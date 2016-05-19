@@ -51,3 +51,5 @@ RunNN <- function(input, layer_sizes, weights, biases) #Inputs include all eleme
 }
 
 
+###Alternatively, and possibly faster, we can use matrix operations to speed up the run.
+#however, the above solution works fine for now. Later we may update this section.
