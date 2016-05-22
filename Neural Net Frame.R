@@ -51,5 +51,53 @@ RunNN <- function(input, layer_sizes, weights, biases) #Inputs include all eleme
 }
 
 
-###Alternatively, and possibly faster, we can use matrix operations to speed up the run.
-#however, the above solution works fine for now. Later we may update this section.
+###Alternatively, we can use matrix operations to speed up the run.
+#Specifically, this allows us to create input matrices and run several rounds at once
+
+#Begin with input in the form of a row vector. If you have three input nodes, then you
+#need three inputs lined up in the same row. Doing many runs corresponds to many rows.
+#a 4x3 matrix for input corresponds to three inputs, run 4 times.
+#another name for these inputs is the activations for layer 0.
+
+#the next thing to consider is the activations for layer 1, the first hidden layer.
+#an activation is the output for a single node, a signal strength if you will.
+#activations are calculated by multiplying the inputs to that node by their corresponding 
+#weights, adding them up, adding in a bias, and then taking the sigmoid of that result.
+
+#to calculate the activations for layer 1, you need to have the weights. Weights are also
+#represented as a matrix, denoted as the weights for layer 1, ie the weights used
+#in calculating the activations for layer 1, even though the weights symbolically
+#exist between the two layers. the rows correspond to the nodes in the previous layer
+#which I call the source nodes. The columns correspond to the nodes in the current layer.
+#ie, all the weights in column 2 are the weights used in calculating the activation of 
+#node 2 in the current layer.
+#A column vector of biases for the current layer is also kept, corresponding to the
+# nodes in the current layer. There is no bias vector for layer 0 (the inputs)
+
+#To calculate the activations for layer 1, matrix multiply the weights for layer 1
+# by the activations for layer 0, then add the bias vector, then element wise apply the
+# sigmoid function. To get the activations for layer 2, matrix multiply the activation
+#(order matters) for layer 2 by the weights for layer 1, plus layer 2 biases, 
+#element wise sigmoid function. And so on for subsequent layers.
+
+#just something to keep track of. Before we apply the sigmoid function, we have a
+# weighted input, we denote that value as Z.
+
+###These are just notes to remember the structure of the network inputs
+#input <- matrix()
+#weights <- list(matrix())
+#biases <- list(vector())
+
+nnpass <- function(input, weights, biases)
+{
+  layers <- length(weights)
+  activations <- rbind(input)
+  for(i in 1:layers)
+  {
+    z <- activations%*%weights[[i]]+biases[[i]]
+    activations <- rbind(sigmoid(z))
+  }
+  return(activations)
+}
+
+#remember. you can save a neural network into a list to make it more consise.
