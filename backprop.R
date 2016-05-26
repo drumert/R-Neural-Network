@@ -34,9 +34,10 @@ updateNetworkMini <- function(net, trainData, eta)
     for(blayer in 1:layers)
     {
       bcopy <- net$biases[[blayer]]
+      copybiases[[blayer]] <- bcopy
       for(brep in 2:inreps)
       {
-        copybiases[[blayer]] <- cbind(net$biases[[blayer]],bcopy)
+        copybiases[[blayer]] <- cbind(copybiases[[blayer]],bcopy)
       }
     }
   }
@@ -103,8 +104,8 @@ trainNetwork <- function(trainDataTotal, net, eta, epochs, mini_size)
   for(i in 1: epochs)
   {
     shuffled <- sample(1:totalIN,totalIN)
-    shuffDataIN <- trainDataTotal$inputl[,shuffled]
-    shuffDataOUT <- trainDataTotal$output[,shuffled]
+    shuffDataIN <- rbind(trainDataTotal$input[,shuffled])
+    shuffDataOUT <- rbind(trainDataTotal$output[,shuffled])
     for(j in 1:nbatches)
     {
       if(j == nbatches)
@@ -114,14 +115,15 @@ trainNetwork <- function(trainDataTotal, net, eta, epochs, mini_size)
       }
       else
       {
-        minibatchIN <- shuffDataIN[,(mini_size*(nbatches-1)+(1:mini_size))]
-        minibatchOUT <- shuffDataOUT[,(mini_size*(nbatches-1)+(1:mini_size))]
+        minibatchIN <- shuffDataIN[,(mini_size*(j-1)+(1:mini_size))]
+        minibatchOUT <- shuffDataOUT[,(mini_size*(j-1)+(1:mini_size))]
       }
       tdata <-list(input = minibatchIN, output = minibatchOUT)
       net <- updateNetworkMini(net,tdata, eta)
     }
     ##Here we will include a test data check for each epoch, giving an accuracy report
   }
+  return(net)
 }
 
 #Training Data needs to be formatted as a 2 element list with input matrix and output matrix
@@ -148,27 +150,28 @@ trainNetwork <- function(trainDataTotal, net, eta, epochs, mini_size)
 #)
 #eta <- .5
 
-innn <- sample(c(0,1),10,TRUE)
-outt <- sum(innn)/10
+innn <- sample(c(0,1),3,TRUE)
+outt <- sum(innn)/3
 
-for(i in 1:1000)
+for(i in 2:10000)
 {
-  innnt <- sample(c(0,1),10,TRUE)
-  outtt <- sum(innnt)/10
+  innnt <- sample(c(0,1),3,TRUE)
+  outtt <- sum(innnt)/3
   innn <- cbind(innn,innnt)
   outt <- cbind(outt,outtt)
 }
-trainDataTotal <- list(
+trainData <- list(
   input = innn,
   output = outt
 )
 
-net <- cnt1s
-eta <- .001
-epochs <- 30
-mini_size <- 50
+
+eta <- .005
+epochs <- 300
+mini_size <- 10
 ##NOTE to resume: can't get the shuffDataIN to work.
 
-#cnt1s <- trainNetwork(trainData, cnt1s, .001, 30, 50)
+net <- trainNetwork(trainData, net, eta, epochs, mini_size)
 
 
+nnpass(c(0,0,0), net)

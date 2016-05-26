@@ -96,14 +96,14 @@ RunNN <- function(input, layer_sizes, weights, biases) #Inputs include all eleme
 #weights <- list(matrix())
 #biases <- list(vector())
 
-nnpass <- function(input, weights, biases)
+nnpass <- function(input, net)
 {
-  layers <- length(weights)
-  activations <- rbind(input)
+  layers <- length(net$weights)
+  activations <- cbind(input)
 
   for(i in 1:layers)
   {
-    z <- activations%*%weights[[i]]+biases[[i]]
+    z <- t(net$weights[[i]])%*%activations+net$biases[[i]]
     activations <- sigmoid(z)
   }
   return(activations)
