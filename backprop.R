@@ -149,29 +149,29 @@ trainNetwork <- function(trainDataTotal, net, eta, epochs, mini_size)
 #  output = cbind(c(0,0),c(1,1))
 #)
 #eta <- .5
+#############################
+#innn <- sample(c(0,1),3,TRUE)
+#outt <- sum(innn)/3
 
-innn <- sample(c(0,1),3,TRUE)
-outt <- sum(innn)/3
-
-for(i in 2:10000)
-{
-  innnt <- sample(c(0,1),3,TRUE)
-  outtt <- sum(innnt)/3
-  innn <- cbind(innn,innnt)
-  outt <- cbind(outt,outtt)
-}
-trainData <- list(
-  input = innn,
-  output = outt
-)
-
-
-eta <- .005
-epochs <- 300
-mini_size <- 10
+#for(i in 2:10000)
+#{
+#  innnt <- sample(c(0,1),3,TRUE)
+#  outtt <- sum(innnt)/3
+#  innn <- cbind(innn,innnt)
+#  outt <- cbind(outt,outtt)
+#}
+#trainData <- list(
+#  input = innn,
+#  output = outt
+#)
+#
+#
+#eta <- .005
+#epochs <- 300
+#mini_size <- 10
 ##NOTE to resume: can't get the shuffDataIN to work.
 
-net <- trainNetwork(trainData, net, eta, epochs, mini_size)
+#net <- trainNetwork(trainData, net, eta, epochs, mini_size)
 
 
-nnpass(c(0,0,0), net)
+#nnpass(c(0,0,0), net)
