@@ -39,7 +39,7 @@ BuildNet <- function()
     weights[[k]] <- matrix(rnorm(ninlay[k]*ninlay[k+1],0,.1), nrow = ninlay[k], ncol = ninlay[k+1])
   }
   name <- readline(prompt = "Enter the name of your network : ")
-  assign(name, list(ninlay = ninlay,weights = weights,biases = biases), envir = .GlobalEnv)
+  assign(name, list(weights = weights,biases = biases), envir = .GlobalEnv)
 }
 
 

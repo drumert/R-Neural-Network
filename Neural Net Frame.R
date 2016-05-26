@@ -83,6 +83,14 @@ RunNN <- function(input, layer_sizes, weights, biases) #Inputs include all eleme
 #just something to keep track of. Before we apply the sigmoid function, we have a
 # weighted input, we denote that value as Z.
 
+#a quirk in R is that the biases MUST be standard vectors, not arrays or matrices
+#with a dimension of 1. It must be a regular, non rbind or rbind vector of values.
+#this ensures that the biases distribute properly when multiple input sets are 
+#introduced.
+
+#also, when we rbind the inputs, it makes sure we have a row vector for a single
+#input, but it does nothing to a matrix of multiple inputs, so its fine to keep
+
 ###These are just notes to remember the structure of the network inputs
 #input <- matrix()
 #weights <- list(matrix())
@@ -92,12 +100,14 @@ nnpass <- function(input, weights, biases)
 {
   layers <- length(weights)
   activations <- rbind(input)
+
   for(i in 1:layers)
   {
     z <- activations%*%weights[[i]]+biases[[i]]
-    activations <- rbind(sigmoid(z))
+    activations <- sigmoid(z)
   }
   return(activations)
 }
 
 #remember. you can save a neural network into a list to make it more consise.
+

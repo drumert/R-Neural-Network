@@ -1,32 +1,174 @@
 ##Back propogation
 
-#in order to back propogate we use the delta method. Finding a delta value for every node in
-#a layer. We begin by calculating delta values, and subsequent partial derivatives of overall cost relative to 
-#a particular weight.
+#The general form to update a bias or a weight is as follows
 
-#recall
-sig <- function(x)
+#where wb represents a single weight or bias, eta is the lerning rate, and grad is the gradient of the respective parameter
+
+##In our learning process we will use stochastic gradient descent, therefore one of the
+#first things we do to begin is to break our training data into clusters of the same size
+  #note, data must be in a vector form
+
+
+sigmoid <- function(z)
 {
-  1/(1+exp(-x))
+  return(1/(1+exp(-z)))
 }
 
-d_sig <- function(s)
-{#the derivative of sigmoid is the sigmoid times 1 - sigmoid.
-  #just remember that s = sig(x), so we would replace it.
-  s*(1-s)
+d_sig <- function(z)
+{
+  sigmoid(z)*(1-sigmoid(z))
 }
 
-#in the 11 lines of code thing, input is a row vector. Multiple sets of inputs corresond
-#to the many rows in a matrix.
-#these are your activations for layer 0 (input)
-#activations for layer 1 is the sigmoid of the matrix multiplication of syn0, the weights
-#after input layer 0, where the row corresponds to one source node.
-#then to get l2 matrix, matrix multiply the l2 matrix with the syn1 weights matrix. And so on
 
-#back propogating starts with the last layer. calculate the error in that layer
-#by doing the output - L2
-#then get the delta with l2 error * derivative of sigmoid of layer 1
-#then the error of layer 1 is layer2 delta matrix mult by syn1 transpose 
-#then the delta of layer 1 is l1 error times d_sig(l1)
-#then the weight updates are plues equal that layer's transpose activations matrix multiplied by the next layer's delta
+updateNetworkMini <- function(net, trainData, eta)
+{
+  #Feedforward, saving the layer's activations
+  layers <- length(net$weights)
+  activations <- list()
+  activations[[1]] <- trainData$input
+  z <- list()
+  inreps <-dim(trainData$input)[2]
+  if(inreps >1)
+  {
+    copybiases <- list()
+    for(blayer in 1:layers)
+    {
+      bcopy <- net$biases[[blayer]]
+      for(brep in 2:inreps)
+      {
+        copybiases[[blayer]] <- cbind(net$biases[[blayer]],bcopy)
+      }
+    }
+  }
+  else
+  {
+    copybiases <- net$biases
+  }
+  for(i in 1:layers)
+  {
+    z[[i]] <- t(net$weights[[i]]) %*% activations[[i]] + copybiases[[i]]
+    activations[[i+1]] <- sigmoid(z[[i]])
+  }
+  
+  #Now we compute layer deltas
+  deltas <- list()
+  deltas[[layers]] <- (activations[[layers+1]]-trainData$output) * d_sig(z[[layers]])
+  for(j in (layers-1):1)
+  {
+    deltas[[j]] <- (net$weights[[j+1]]%*%deltas[[j+1]]) * d_sig(z[[j]])
+  }
+  
+  #now we compute gradients for biases and weights
+  biasgrad <- list()
+  for(k in 1:layers)
+  {
+    sum_matrix <- matrix(1, ncol = 1, nrow = inreps)
+    biasgrad[[k]] <- (1/inreps)*(deltas[[k]]%*%sum_matrix)
+  }
+  
+  weightgrad <- list()
+  for(l in 1:layers)
+  {
+    weightgrad[[l]] <- (1/inreps)*(activations[[l]]%*%t(deltas[[l]]))
+  }
+
+  
+  #now we calculate the updated weights for each input.
+  
+  newbiases <- list()
+  newweights <- list()
+  for(m in 1:layers)
+  {
+    net$biases[[m]] <- net$biases[[m]] - eta * biasgrad[[m]]
+    net$weights[[m]] <- net$weights[[m]] - eta * weightgrad[[m]]
+  }
+  #now we would average all the proposals and update the weights
+  #however because we took a linear approach, this has been done already in the 
+  #gradient computation section 
+  return(net)
+  #the way this works is you have to assign the output of this function to a net
+  #it makes one step of gradient descent. 
+}
+
+#the only step left now is to partition the training data. This program runs a mini
+#batch of any size given the weights, biases, and inputs.
+#we will construct an outer function to pass in a complete data set with inputs,
+#outputs, and partitioning guides.
+
+trainNetwork <- function(trainDataTotal, net, eta, epochs, mini_size)
+{
+  totalIN <- dim(trainDataTotal$input)[2]
+  nbatches <- round(totalIN/mini_size)
+  
+  for(i in 1: epochs)
+  {
+    shuffled <- sample(1:totalIN,totalIN)
+    shuffDataIN <- trainDataTotal$inputl[,shuffled]
+    shuffDataOUT <- trainDataTotal$output[,shuffled]
+    for(j in 1:nbatches)
+    {
+      if(j == nbatches)
+      {
+        minibatchIN <- shuffDataIN[,(mini_size*(nbatches-1)+1):totalIN]
+        minibatchOUT <- shuffDataOUT[,(mini_size*(nbatches-1)+1):totalIN]
+      }
+      else
+      {
+        minibatchIN <- shuffDataIN[,(mini_size*(nbatches-1)+(1:mini_size))]
+        minibatchOUT <- shuffDataOUT[,(mini_size*(nbatches-1)+(1:mini_size))]
+      }
+      tdata <-list(input = minibatchIN, output = minibatchOUT)
+      net <- updateNetworkMini(net,tdata, eta)
+    }
+    ##Here we will include a test data check for each epoch, giving an accuracy report
+  }
+}
+
+#Training Data needs to be formatted as a 2 element list with input matrix and output matrix
+  #the inputs and outputs for an individual case are aligned column wise, keeping
+  #consistent with a typical mapping of a neural network where the nodes are stacked.
+#Represent a neural network as a list with the following elements in the list
+  #weights <- list(matrix()) matrix for each layer(starting with 1-2) where row is source node and column is receiving node
+  #input <- vector() The results from the pervious layer's nodes
+  #biases <- list(vector()) list elements are layers, vector elements are node biases, again start the list with layer 2, ignoring layer 1 as it has nothing to do with it.
+
+#net <- list(
+#  weights = list(
+#    rbind(c(0,0),c(1,1)),
+#    rbind(c(1,1),c(0,0))
+#  ),
+#  biases = list(
+#    cbind(c(-1,-1)),
+#    cbind(c(0,0))
+#  )
+#)
+#trainData <- list(
+#  input = cbind(c(-1,-1),c(0,0)),
+#  output = cbind(c(0,0),c(1,1))
+#)
+#eta <- .5
+
+innn <- sample(c(0,1),10,TRUE)
+outt <- sum(innn)/10
+
+for(i in 1:1000)
+{
+  innnt <- sample(c(0,1),10,TRUE)
+  outtt <- sum(innnt)/10
+  innn <- cbind(innn,innnt)
+  outt <- cbind(outt,outtt)
+}
+trainDataTotal <- list(
+  input = innn,
+  output = outt
+)
+
+net <- cnt1s
+eta <- .001
+epochs <- 30
+mini_size <- 50
+##NOTE to resume: can't get the shuffDataIN to work.
+
+#cnt1s <- trainNetwork(trainData, cnt1s, .001, 30, 50)
+
 
