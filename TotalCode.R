@@ -80,7 +80,7 @@ updateNetworkMini <- function(net, trainData, eta)
     activations[[i+1]] <- sigmoid(z[[i]])
   }
   deltas <- list()
-  deltas[[layers]] <- (activations[[layers+1]]-trainData$output) * d_sig(z[[layers]])
+  deltas[[layers]] <- (activations[[layers+1]]-trainData$output) #* d_sig(z[[layers]])
   for(j in (layers-1):1)
   {
     deltas[[j]] <- (net$weights[[j+1]]%*%deltas[[j+1]]) * d_sig(z[[j]])
@@ -139,3 +139,9 @@ trainNetwork <- function(trainDataTotal, net, eta, epochs, mini_size)
 ###############################################################################
 
 #We now attempt testing on the Titanic data set
+
+
+
+
+
+
