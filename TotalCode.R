@@ -80,7 +80,7 @@ updateNetworkMini <- function(net, trainData, eta)
     activations[[i+1]] <- sigmoid(z[[i]])
   }
   deltas <- list()
-  deltas[[layers]] <- (activations[[layers+1]]-trainData$output) #* d_sig(z[[layers]])
+  deltas[[layers]] <- (activations[[layers+1]]-trainData$output) #* d_sig(z[[layers]])#
   for(j in (layers-1):1)
   {
     deltas[[j]] <- (net$weights[[j+1]]%*%deltas[[j+1]]) * d_sig(z[[j]])
@@ -139,9 +139,89 @@ trainNetwork <- function(trainDataTotal, net, eta, epochs, mini_size)
 ###############################################################################
 
 #We now attempt testing on the Titanic data set
+train <- read.csv("~/Downloads/train.csv")
+test <- read.csv("~/Downloads/test.csv")
 
+clean <- function(dat)
+  {
+  dat$Ticket <- NULL
+  dat$Cabin <- NULL
+  dat$Name <- NULL
+  dat$PassengerId <- NULL
+  #dat <- dat[!is.na(dat$Age),]
+  #dat <- dat[!is.na(dat$Fare),]
+  dat$Age[is.na(dat$Age)] <- mean(dat$Age[!is.na(dat$Age)])
+  dat$Fare[is.na(dat$Fare)] <- mean(dat$Fare[!is.na(dat$Fare)])
+  
+  genderBin <- function(x)
+  {
+    if(x == "male") {return(1)}
+    else {return(0)}
+  }
+  embScale <- function(x)
+  {
+    if(x == "S") {return(1/4)}
+    else if(x == "C") {return(2/4)}
+    else if(x == "Q") {return(3/4)}
+    else {return(4/4)}
+  }
+  normalize <- function(x)
+  {
+    mu <- mean(x)
+    sig <- sd(x)
+    return(((x-mu)/sig)/6)
+  }
+  dat$Sex <- sapply(dat$Sex, FUN = genderBin)
+  dat$Pclass <- dat$Pclass/3
+  dat$Embarked <- sapply(dat$Embarked, FUN = embScale)
+  dat$Age <- normalize(dat$Age)
+  dat$SibSp <- normalize(dat$SibSp)
+  dat$Parch <- normalize(dat$Parch)
+  dat$Fare <- normalize(dat$Fare)
+  return(dat)
+}
+train <- clean(train)
+test <- clean(test)
+trainSurv <- rbind(train$Survived)
+train$Survived <- NULL
 
+traincheck <- sample(1:length(train$Pclass),length(train$Pclass))
+trainTest <- t(train[traincheck[1:100],])
+trainTrain <- t(train[traincheck[101:length(traincheck)],])
+trainTrainout <- trainSurv[traincheck[101:length(traincheck)]]
+trainTestout <- trainSurv[traincheck[1:100]]
 
+tData <- list(input = as.matrix.data.frame(trainTrain), output = rbind(trainTrainout))
+#BuildNet()
+sv <- numeric()
+  for(j in 1:100)
+{
+titanNet <- trainNetwork(tData,titanNet,.5,1,30) #nets at 7,25,1 optimized
+#sum(nnpass(as.matrix.data.frame(trainTest),titanNet) == trainTestout)
+saves <- logical()
+print(j)
+for(i in 1:dim(trainTest)[2])
+{
+  saves[i] <- 0
+   if(as.numeric(round(nnpass(cbind(as.matrix(trainTest[,i])),titanNet))) == trainTestout[i])
+   {
+     saves[i] <- 1
+   }
+  #cat(as.numeric(round(nnpass(cbind(as.matrix(trainTest[,i])),titanNet))),"|||",trainTestout[i],"\n")
+}
+sv[j] <- sum(saves)
+}
 
+sv
+plot(sv,type = 'l')
+
+testGo <- t(test)
+outs <- numeric()
+for(k in 1:dim(testGo)[2])
+{
+  outs[k] <- as.numeric(round(nnpass(as.matrix(testGo[,k]),titanNet)))
+}
+
+write.csv(data.frame(PassengerID = 892:1309, Survived = outs),"~/Desktop/NNtitan.csv")
 
 
