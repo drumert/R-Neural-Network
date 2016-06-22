@@ -205,12 +205,12 @@ learnTTinef <- function(Q,ep=.999,lrate=.1,disc=1,games)
       Q[[loc]]$q <- Q[[loc]]$q + lrate*(reward(boardCom)+disc*max(tempQs)-Q[[loc]]$q)
       board <- boardOp #now we begin again with the oponents board chocie as our current board
     }
-    ep <- ep*.999
+    ep <- ep*.9999
   }
   assign("Q",Q,envir=.GlobalEnv)
 }
 
-learnTTinef(Q,ep=.999,lrate=.1,disc=1,games=10000) ######################################
+learnTTinef(Q,ep=.9999,lrate=.1,disc=1,games=200000) ######################################
 
 printBoard <- function(board)
 {
