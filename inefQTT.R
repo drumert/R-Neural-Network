@@ -210,7 +210,7 @@ learnTTinef <- function(Q,ep=.999,lrate=.1,disc=1,games)
   assign("Q",Q,envir=.GlobalEnv)
 }
 
-learnTTinef(Q,ep=.999,lrate=.1,disc=1,games=2000) ######################################
+learnTTinef(Q,ep=.999,lrate=.1,disc=1,games=10000) ######################################
 
 printBoard <- function(board)
 {
