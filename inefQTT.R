@@ -104,13 +104,38 @@ getQ <- function(board,Q)
   }
 }
 
+randomStart <- function()
+{
+  choice <- sample(1:3,1)
+  board <- c(0,0,0,0,0,0,0,0,0)
+  
+  if(choice == 1)
+  {
+    ind <- sample(1:9,4)
+    board[ind] <- sample(c(1,1,-1,-1),4)
+  }
+  if(choice == 2)
+  {
+    ind <- sample(1:9,2)
+    board[ind] <- sample(c(1,-1),2)
+  }
+  if(choice == 3)
+  {
+    board <- board
+  }
+  return(board)
+}
+
 Q <- list()
 Q[[1]] <- list(board = c(0,0,0,0,0,0,0,0,0), q = 0)
-learnTTinef <- function(Q,ep=.1,lrate=.1,disc=1,games)
+learnTTinef <- function(Q,ep=.999,lrate=.1,disc=1,games)
 {
   for(i in 1:games)#play many rounds
   {
-    board <- c(0,0,0,0,0,0,0,0,0) #newgame
+    cat("Game ",i," of ",games,"\n")
+    board <- randomStart() #newgame
+    #board <- c(0,0,0,0,0,0,0,0,0)
+    Q <- addtoQ(board,Q)
     while(TRUE)#Play a single game
     {#computer goes first
       poss <- showPossibleMoves(board) #Observe the possible moves
@@ -132,6 +157,7 @@ learnTTinef <- function(Q,ep=.1,lrate=.1,disc=1,games)
       else
       {#random exploration play
         boardCom <- random.choice(poss)
+        Q <- addtoQ(boardCom,Q)
       }
       #Before going on we need to check for a win OR A DRAW
       if(reward(boardCom) == 100)
@@ -179,11 +205,12 @@ learnTTinef <- function(Q,ep=.1,lrate=.1,disc=1,games)
       Q[[loc]]$q <- Q[[loc]]$q + lrate*(reward(boardCom)+disc*max(tempQs)-Q[[loc]]$q)
       board <- boardOp #now we begin again with the oponents board chocie as our current board
     }
+    ep <- ep*.999
   }
   assign("Q",Q,envir=.GlobalEnv)
 }
 
-learnTTinef(Q,ep=.5,lrate=.1,disc=1,games=1000)
+learnTTinef(Q,ep=.999,lrate=.1,disc=1,games=2000) ######################################
 
 printBoard <- function(board)
 {
