@@ -23,7 +23,7 @@ reward <- function(board)
   }
   else
   {
-    return(-1)
+    return(0)
   }
 }
 
@@ -251,7 +251,7 @@ playTT <- function(Q)
     
     cat("Computers Move\n")
     printBoard(board)
-    if(reward(board) > -1)
+    if(reward(board) > 0)
     {
       cat("Computer Wins!!\n")
       break
@@ -266,7 +266,7 @@ playTT <- function(Q)
     choice <- as.numeric(readline("Select the number of the slot you wish to play: "))
     board[choice] <- -1
     printBoard(board)
-    if(reward(board) < -1)
+    if(reward(board) < 0)
     {
       cat("Player Wins!!\n")
       break
