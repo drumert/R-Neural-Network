@@ -1,0 +1,13 @@
+
+model{
+for(i in 1:2270){
+logTime[i] ~ dnorm(mu[i],1/vv)
+mu[i] <- b0 + bstates*states[i]+bactions*actions[i]+bsa*states[i]*actions[i]
+}
+vv ~ dgamma(1,.0008)
+b0 ~ dnorm(0,.0000001)
+bstates ~ dnorm(0,.0000001)
+bactions ~ dnorm(0,.0000001)
+bsa ~ dnorm(0,.0000001)
+}
+
