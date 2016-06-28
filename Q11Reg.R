@@ -85,11 +85,12 @@ convTime <- function(nS,nA,ep=.1,lrate=.1,disc=1)
 Qdata <- data.frame(matrix(ncol=3))
 colnames(Qdata) <- c("States","Actions","Time")
 Qc <- 0
-for(i in c(11,13,14,15,17,18,19,21,21,23,25,26,27,29,30,31))
+for(i in 11:30)
 {
   print(i)
   for(j in 2:6)
   {
+    if(i%%(j+1) == 0){next}
     for(k in 1:10)
     {
       Qc <- Qc + 1
