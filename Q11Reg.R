@@ -133,7 +133,7 @@ Qfit <- jags(data=data.jags,inits = NULL,parameters.to.save = parms,
 Qfit
 sims <- as.mcmc(Qfit)
 plot(sims)
-par(mfrow=c(1,1))
+par(mfrow=c(2,1))
 plot(states,logTime)
 plot(actions,logTime)
 
