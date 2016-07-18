@@ -224,4 +224,19 @@ for(k in 1:dim(testGo)[2])
 
 write.csv(data.frame(PassengerID = 892:1309, Survived = outs),"~/Desktop/NNtitan.csv")
 
+#Now we will use the package neuralnet to do this.
 
+library(neuralnet)
+dat3 <- data.frame(rbind(c(0,0,0,0)))
+colnames(dat3) <- c("in1","in2","in3","cnt")
+for(i in 1:10000)
+{
+  x <- sample(0:1,3,TRUE)
+  newrow <- c(x,sum(x))
+  dat3 <- rbind(dat3,newrow)
+}
+
+
+count.net <- neuralnet(cnt ~ in1 + in2 + in3,data = dat3, hidden = 6)
+plot(count.net)
+compute(count.net,rbind(c(1,1,1)))$net.result
